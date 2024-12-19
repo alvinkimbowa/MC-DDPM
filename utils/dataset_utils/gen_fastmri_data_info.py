@@ -3,6 +3,7 @@ import h5py
 import numpy as np
 import argparse
 import pickle
+from tqdm import tqdm
 
 
 NUM_CUT_SLICES = 5
@@ -13,8 +14,7 @@ def create_argparser():
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--data_info_dir", default="data/fastmri", type=str)
     parser.add_argument("--num_files", default=-1, type=int)
-    parser.add_argument("--num_pd_files", default=-1, type=int)
-    parser.add_argument("--num_pdfs_files", default=-1, type=int)
+    parser.add_argument("--acquisitions", nargs="+", type=str)
     parser.add_argument("--data_info_file_name", type=str)
     return parser
 
@@ -30,10 +30,9 @@ def main():
                 break
 
     data_info_list = []
-    pd_count = 0
-    pdfs_count = 0
-    for file_name in file_list:
-        if pd_count == args.num_pd_files and pdfs_count == args.num_pdfs_files:
+    count = 0
+    for file_name in tqdm(file_list):
+        if count == args.num_files:
             break
 
         file_path = os.path.join(args.data_dir, file_name)
@@ -42,19 +41,12 @@ def main():
         acquisition = data.attrs["acquisition"]
         num_slice = len(image_rss)
 
-        if acquisition == "CORPD_FBK":
-            if pd_count == args.num_pd_files:
-                continue
+        if acquisition in args.acquisitions:
             for i in range(NUM_CUT_SLICES, num_slice - NUM_CUT_SLICES):
                 data_info_list.append((file_name, i))
-            pd_count += 1
-        else:
-            if pdfs_count == args.num_pdfs_files:
-                continue
-            for i in range(NUM_CUT_SLICES, num_slice - NUM_CUT_SLICES):
-                data_info_list.append((file_name, i))
-            pdfs_count += 1
+            count += 1
 
+    os.makedirs(args.data_info_dir, exist_ok=True)
     with open(os.path.join(args.data_info_dir, f"{args.data_info_file_name}.pkl"), "wb") as f:
         pickle.dump(data_info_list, f)
         print(f"{args.data_info_file_name}, num of slices: {len(data_info_list)}")
