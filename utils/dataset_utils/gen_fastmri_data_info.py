@@ -40,16 +40,18 @@ def main():
         image_rss = np.array(data["reconstruction_rss"])
         acquisition = data.attrs["acquisition"]
         num_slice = len(image_rss)
+        num_coils = data["kspace"].shape[1]
 
         if acquisition in args.acquisitions:
             for i in range(NUM_CUT_SLICES, num_slice - NUM_CUT_SLICES):
-                data_info_list.append((file_name, i))
+                for c in range(num_coils):
+                    data_info_list.append((file_name, i, c))
             count += 1
 
     os.makedirs(args.data_info_dir, exist_ok=True)
     with open(os.path.join(args.data_info_dir, f"{args.data_info_file_name}.pkl"), "wb") as f:
         pickle.dump(data_info_list, f)
-        print(f"{args.data_info_file_name}, num of slices: {len(data_info_list)}")
+        print(f"{args.data_info_file_name}, num of slices: {len(data_info_list)}, num of coils: {num_coils}")
 
 
 if __name__ == "__main__":

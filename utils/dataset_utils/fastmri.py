@@ -91,6 +91,7 @@ class FastmriDataset(Dataset):
             accelerations,
             mask_seed_fixed,
             post_process,
+            size=(256, 256),
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -101,16 +102,17 @@ class FastmriDataset(Dataset):
         self.mask_seed_fixed = mask_seed_fixed
         self.post_process = post_process
         self.data_info_list = data_info_list
+        self.size = size
 
     def __len__(self):
         return len(self.data_info_list)
 
     def __getitem__(self, idx):
-        file_name, index = self.data_info_list[idx]
-        acquisition, kspace_raw, image_rss = read_datafile(self.data_dir, file_name, index)
+        file_name, index, coil_index = self.data_info_list[idx]
+        acquisition, kspace_raw, image_rss = read_datafile(self.data_dir, file_name, index, coil_index)
 
         image_raw = ifftc_np_from_raw_data(kspace_raw)
-        image = center_crop_image(image_raw, size=(320, 320))  # crop to 320x320 at center
+        image = center_crop_image(image_raw, size=self.size)  # crop to 320x320 at center
 
         # use image_rss as the magnitude and keep the phase unchanged
         # after processing, image is different to original one.
@@ -174,7 +176,7 @@ class FastmriDataset(Dataset):
         return kspace_c, args_dict
 
 
-def read_datafile(data_dir, file_name, slice_index):
+def read_datafile(data_dir, file_name, slice_index, coil_index):
     """
     Read mri data of fastmri dataset from .h5 file.
 
@@ -188,8 +190,8 @@ def read_datafile(data_dir, file_name, slice_index):
     file_path = os.path.join(data_dir, file_name)
     data = h5py.File(file_path, mode="r")
     acquisition = data.attrs["acquisition"]
-    kspace_raw = np.array(data["kspace"])[slice_index]
-    image_rss = np.array(data["reconstruction_rss"])[slice_index]
+    kspace_raw = np.array(data["kspace"])[slice_index][coil_index]
+    image_rss = np.array(data["reconstruction_rss"])[slice_index][coil_index]
     return acquisition, kspace_raw, image_rss
 
 
