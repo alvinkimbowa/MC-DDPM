@@ -1,5 +1,6 @@
 logs
-*/__pycache__/*
+checkpoints
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
