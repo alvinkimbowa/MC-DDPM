@@ -1,0 +1,6 @@
+matplotlib
+tensorboardX
+fastmri
+blobfile
+pynvml
+requests
