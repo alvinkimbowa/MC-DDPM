@@ -2,6 +2,12 @@ import contextlib
 import numpy as np
 
 
+ACC2 = {
+    "mask_type": "random",
+    "center_fractions": [0.16],
+    "accelerations": [2]
+}
+
 ACC4 = {
     "mask_type": "random",
     "center_fractions": [0.08],
@@ -12,7 +18,6 @@ ACC8 = {
     "center_fractions": [0.04],
     "accelerations": [8]
 }
-
 
 @contextlib.contextmanager
 def temp_seed(rng, seed):

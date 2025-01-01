@@ -1,4 +1,4 @@
-from utils.mri_data_utils.mask_util import ACC4, ACC8
+from utils.mri_data_utils.mask_util import ACC2, ACC4, ACC8
 from utils.dataset_utils import fastmri
 
 
@@ -28,7 +28,9 @@ def create_training_dataset(
         is_distributed,
         num_workers,
 ):
-    if acceleration == 4:
+    if acceleration == 2:
+        acc_factor = ACC2
+    elif acceleration == 4:
         acc_factor = ACC4
     elif acceleration == 8:
         acc_factor = ACC8
@@ -78,7 +80,9 @@ def create_test_dataset(
         is_distributed,
         num_workers,
 ):
-    if acceleration == 4:
+    if acceleration == 2:
+        acc_factor = ACC2
+    elif acceleration == 4:
         acc_factor = ACC4
     elif acceleration == 8:
         acc_factor = ACC8
