@@ -209,4 +209,4 @@ def ifftc_np_from_raw_data(kspace_raw):
 
 
 def seed_from_file_name_slice_index(file_name, slice_index):
-    return int(file_name[4:-3]) * 100 + slice_index
+    return int(file_name.split("_")[0]) + slice_index
