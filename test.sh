@@ -5,7 +5,7 @@
 #SBATCH --account=st-ilker-1-gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=8
 #SBATCH --gpus=1
 #SBATCH --mem=32G
 # #SBATCH --constraint=gpu_mem_32
@@ -22,34 +22,31 @@ SOCKEYE=1
 if [ $SOCKEYE -eq 1 ]; then
     data_dir=/home/alvinbk/project/EECE571/datasets/m4raw
     source ~/.bashrc
-    conda activate promptmr
+    conda activate mcddm
 else
     data_dir=/home/alvin/UltrAi/Datasets/raw_datasets/m4raw/
     source venv/bin/activate
     export CUDA_VISIBLE_DEVICES=0
 fi
 
-acceleration=2
+acceleration=8
 batch_size=32
-microbatch=8
-
-# resume_checkpoint=logs/m4raw/acc_${acceleration}/checkpoints/step_35000.pth
 
 echo acceleration: $acceleration
 echo batch_size: $batch_size
-echo microbatch: $microbatch
 
-torchrun --nproc_per_node=1 train.py \
+torchrun --nproc_per_node=1 test.py \
     --method_type mcddpm \
     --log_dir logs/m4raw/acc_${acceleration} \
     --dataset fastmri \
-    --data_dir ${data_dir}/multicoil_train \
-    --data_info_list_path data/m4raw/train_info.pkl \
+    --data_dir ${data_dir}/multicoil_val \
+    --data_info_list_path data/m4raw/val_info.pkl \
     --batch_size $batch_size \
     --acceleration $acceleration \
-    --num_workers 1 \
-    --microbatch $microbatch \
-    --log_interval 10 \
-    --save_interval 5000 \
-    --max_step 35000 \
-    --model_save_dir logs/m4raw/acc_${acceleration}/checkpoints
+    --num_workers 4 \
+    --model_save_dir logs/m4raw/acc_${acceleration}/checkpoints \
+    --output_dir logs/m4raw/acc_${acceleration}/outputs \
+    --resume_checkpoint model035000.pt \
+    --num_samples_per_mask 20 \
+    --debug_mode False \
+    --image_size 256 \
