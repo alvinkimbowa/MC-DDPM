@@ -17,7 +17,7 @@
 
 #############################################################################
 
-SOCKEYE=1
+SOCKEYE=0
 
 if [ $SOCKEYE -eq 1 ]; then
     data_dir=/home/alvinbk/project/EECE571/datasets/m4raw
@@ -30,23 +30,31 @@ else
 fi
 
 acceleration=8
-batch_size=32
+batch_size=1
+test_split=test
+log_dir=logs/m4raw/acc_${acceleration}
+output_dir=${log_dir}/outputs/${test_split}
 
+echo CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES
 echo acceleration: $acceleration
 echo batch_size: $batch_size
+echo log_dir: $log_dir
+echo test_split: $test_split
+echo output_dir: $output_dir
 
 torchrun --nproc_per_node=1 test.py \
     --method_type mcddpm \
-    --log_dir logs/m4raw/acc_${acceleration} \
+    --log_dir $log_dir \
     --dataset fastmri \
-    --data_dir ${data_dir}/multicoil_val \
-    --data_info_list_path data/m4raw/val_info.pkl \
+    --data_dir ${data_dir}/multicoil_${test_split} \
+    --data_info_list_path data/m4raw_2_files/${test_split}_info.pkl \
     --batch_size $batch_size \
     --acceleration $acceleration \
-    --num_workers 4 \
+    --num_workers 12 \
     --model_save_dir logs/m4raw/acc_${acceleration}/checkpoints \
-    --output_dir logs/m4raw/acc_${acceleration}/outputs \
+    --output_dir $output_dir \
     --resume_checkpoint model035000.pt \
-    --num_samples_per_mask 20 \
+    --log_interval 10 \
+    --num_samples_per_mask 1 \
     --debug_mode False \
-    --image_size 256 \
+    --image_size 256
