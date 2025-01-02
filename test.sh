@@ -27,15 +27,15 @@ else
     data_dir=/home/alvin/UltrAi/Datasets/raw_datasets/m4raw/
     source venv/bin/activate
     export CUDA_VISIBLE_DEVICES=0
+    echo CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES
 fi
 
-acceleration=8
-batch_size=1
+acceleration=2
+batch_size=32
 test_split=test
 log_dir=logs/m4raw/acc_${acceleration}
 output_dir=${log_dir}/outputs/${test_split}
 
-echo CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES
 echo acceleration: $acceleration
 echo batch_size: $batch_size
 echo log_dir: $log_dir
@@ -47,14 +47,14 @@ torchrun --nproc_per_node=1 test.py \
     --log_dir $log_dir \
     --dataset fastmri \
     --data_dir ${data_dir}/multicoil_${test_split} \
-    --data_info_list_path data/m4raw_2_files/${test_split}_info.pkl \
+    --data_info_list_path data/m4raw/${test_split}_info.pkl \
     --batch_size $batch_size \
     --acceleration $acceleration \
     --num_workers 12 \
     --model_save_dir logs/m4raw/acc_${acceleration}/checkpoints \
     --output_dir $output_dir \
     --resume_checkpoint model035000.pt \
-    --log_interval 10 \
+    --log_interval 50 \
     --num_samples_per_mask 1 \
     --debug_mode False \
     --image_size 256
