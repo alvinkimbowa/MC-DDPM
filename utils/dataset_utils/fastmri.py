@@ -8,6 +8,7 @@ from torch.utils.data.distributed import DistributedSampler
 from utils.mri_data_utils.image_util import center_crop_image
 from utils.mri_data_utils.mask_util import create_mask_for_mask_type
 from utils.mri_data_utils.transform_util import *
+from tqdm import tqdm
 
 
 def load_data(
@@ -59,7 +60,7 @@ def load_data(
             yield from loader
 
     else:
-        for kspace_c, args_dict in dataset:
+        for kspace_c, args_dict in tqdm(dataset, desc="Progress"):
             kspace_c = np2th(kspace_c).unsqueeze(0).repeat(batch_size, 1, 1, 1)
             for k, v in args_dict.items():
                 if isinstance(v, np.ndarray):
